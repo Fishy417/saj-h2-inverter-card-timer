@@ -486,6 +486,7 @@ class SajH2InverterCardTimer extends HTMLElement {
         <span class="readonly-value">${displayTime}</span>
         <label class="readonly-label">End Time</label>
         <input type="time" id="${prefix}-end-time" value="${validEndTime}" step="300" class="time-input-hidden" ${disabled ? 'disabled' : ''} />
+      </div>`;
   }
 
   // Render toggle buttons for switching between charge and discharge modes

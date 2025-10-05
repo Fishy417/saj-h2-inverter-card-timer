@@ -37,7 +37,7 @@ class SajH2InverterCardTimer extends HTMLElement {
   constructor() {
     super();
 
-    console.log(`[SAJ H2 Inverter Card Timer] Version: 1.0.1`);
+    console.log(`[SAJ H2 Inverter Card Timer] Version: 1.0.2`);
   
     // Inverter maximum output in kW (will be set by config, default used if not specified)
     this._inverterMaxOutput = 5.0; // Default value, can be overridden in Lovelace config
@@ -416,7 +416,7 @@ class SajH2InverterCardTimer extends HTMLElement {
 
     const html = `
       <div class="section discharging-section">
-        <h3 class="section-heading">Discharge Control v1.0.1</h3>
+        <h3 class="section-heading">Discharge Control v1.0.2</h3>
         <div class="controls-container">
           <div class="power-control">
             <div class="slider-container">

@@ -1,0 +1,19 @@
+# Custom Lovelace Card Files
+saj-h2-inverter-card-timer.js
+
+# IDE and Editor Files
+.vscode/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Temporary Files
+*.tmp
+*.temp

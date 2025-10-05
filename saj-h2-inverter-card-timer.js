@@ -8,11 +8,11 @@
  * - Timer-based enable functionality for quick setup
  * based on saj-h2-inverter-card by @stanu74
  * @author fishy417 
- * @version 1.0.4
+ * @version 1.0.5
  */
 
 class SajH2InverterCardTimer extends HTMLElement {
-  static VERSION = '1.0.4';
+  static VERSION = '1.0.5';
   
   static get DEFAULT_ENTITIES() {
     // Default entity IDs (can be overridden in Lovelace config)

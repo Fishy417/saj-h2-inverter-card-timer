@@ -8,10 +8,12 @@
  * - Timer-based enable functionality for quick setup
  * based on saj-h2-inverter-card by @stanu74
  * @author fishy417 
- * @version 1.1.7
+ * @version 1.0.2
  */
 
 class SajH2InverterCardTimer extends HTMLElement {
+  static VERSION = '1.0.3';
+  
   static get DEFAULT_ENTITIES() {
     // Default entity IDs (can be overridden in Lovelace config)
     return {
@@ -37,7 +39,7 @@ class SajH2InverterCardTimer extends HTMLElement {
   constructor() {
     super();
 
-    console.log(`[SAJ H2 Inverter Card Timer] Version: 1.0.2`);
+    console.log(`[SAJ H2 Inverter Card Timer] Version: ${SajH2InverterCardTimer.VERSION}`);
   
     // Inverter maximum output in kW (will be set by config, default used if not specified)
     this._inverterMaxOutput = 5.0; // Default value, can be overridden in Lovelace config
@@ -416,7 +418,7 @@ class SajH2InverterCardTimer extends HTMLElement {
 
     const html = `
       <div class="section discharging-section">
-        <h3 class="section-heading">Discharge Control v1.0.2</h3>
+        <h3 class="section-heading">Discharge Control v${SajH2InverterCardTimer.VERSION}</h3>
         <div class="controls-container">
           <div class="power-control">
             <div class="slider-container">
@@ -1301,7 +1303,7 @@ class SajH2InverterCardTimer extends HTMLElement {
         display: flex; flex-direction: column; gap: 16px;
       }
       .power-control, .timer-control {
-        display: flex; align-items: center; gap: 12px; padding-right: 12px;
+        display: flex; align-items: center; gap: 8px; padding-right: 12px;
       }
       .control-label {
         font-size: 1em; font-weight: 500; color: var(--primary-text-color);
@@ -1427,6 +1429,7 @@ class SajH2InverterCardTimer extends HTMLElement {
         background-color: var(--error-color, #f44336); 
         color: var(--text-primary-color-on-error, white);
         margin-left: 8px;
+        margin-right: 16px;
       }
       .enable-btn:hover:not(:disabled) { filter: brightness(110%); box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
       .disable-btn:hover:not(:disabled) { filter: brightness(110%); box-shadow: 0 2px 6px rgba(0,0,0,0.15); }

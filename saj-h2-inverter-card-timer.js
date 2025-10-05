@@ -416,7 +416,7 @@ class SajH2InverterCardTimer extends HTMLElement {
 
     const html = `
       <div class="section discharging-section">
-        <h3 class="section-heading">Discharge Control</h3>
+        <h3 class="section-heading">Discharge Control v1.0.1</h3>
         <div class="controls-container">
           <div class="power-control">
             <div class="slider-container">

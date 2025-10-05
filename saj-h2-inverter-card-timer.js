@@ -498,13 +498,13 @@ class SajH2InverterCardTimer extends HTMLElement {
       <div class="mode-toggle-container">
         <button id="charge-mode-btn" class="mode-toggle-btn ${this._currentViewMode === 'charge' ? 'active' : ''}" 
                 ${chargeEnabled ? 'data-status="enabled"' : 'data-status="disabled"'}>
-          <span class="mode-icon">⚡</span>
+          <span class="mode-icon">&#9889;</span>
           <span class="mode-text">Charge</span>
           <span class="mode-status ${chargeEnabled ? 'status-active' : 'status-inactive'}">${chargeEnabled ? 'ON' : 'OFF'}</span>
         </button>
         <button id="discharge-mode-btn" class="mode-toggle-btn ${this._currentViewMode === 'discharge' ? 'active' : ''}"
                 ${dischargeEnabled ? 'data-status="enabled"' : 'data-status="disabled"'}>
-          <span class="mode-icon">🔋</span>
+          <span class="mode-icon">&#128267;</span>
           <span class="mode-text">Discharge</span>
           <span class="mode-status ${dischargeEnabled ? 'status-active' : 'status-inactive'}">${dischargeEnabled ? 'ON' : 'OFF'}</span>
         </button>

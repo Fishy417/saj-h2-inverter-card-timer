@@ -8,11 +8,11 @@
  * - Timer-based enable functionality for quick setup
  * based on saj-h2-inverter-card by @stanu74
  * @author fishy417 
- * @version 1.0.6
+ * @version 1.0.7
  */
 
 class SajH2InverterCardTimer extends HTMLElement {
-  static VERSION = '1.0.6';
+  static VERSION = '1.0.7';
   
   static get DEFAULT_ENTITIES() {
     // Default entity IDs (can be overridden in Lovelace config)
@@ -50,6 +50,7 @@ class SajH2InverterCardTimer extends HTMLElement {
     // Initialize properties
     this._entities = JSON.parse(JSON.stringify(SajH2InverterCardTimer.DEFAULT_ENTITIES));
     this._mode = 'both';
+    this._currentViewMode = 'charge'; // Track current view mode for toggle
     this._hass = null;
     this._debug = false;
     this._lastForceUpdate = 0;
@@ -248,15 +249,28 @@ class SajH2InverterCardTimer extends HTMLElement {
     let cardContent = '';
     let hasError = false;
 
-    // Render Discharging Section FIRST
-    if (this._mode !== 'charge') {
-      const dischargeResult = this._renderDischargingSection();
-       if (dischargeResult.error) hasError = true;
-      cardContent += dischargeResult.html;
+    // Add toggle buttons if mode is 'both'
+    if (this._mode === 'both') {
+      cardContent += this._renderToggleButtons();
     }
 
-    // Render Charging Section SECOND
-    if (this._mode !== 'discharge') {
+    // Render based on current view mode or specific mode
+    if (this._mode === 'both') {
+      // In 'both' mode, show only the current view mode
+      if (this._currentViewMode === 'discharge') {
+        const dischargeResult = this._renderDischargingSection();
+        if (dischargeResult.error) hasError = true;
+        cardContent += dischargeResult.html;
+      } else {
+        const chargeResult = this._renderChargingSection();
+        if (chargeResult.error) hasError = true;
+        cardContent += chargeResult.html;
+      }
+    } else if (this._mode === 'discharge') {
+      const dischargeResult = this._renderDischargingSection();
+      if (dischargeResult.error) hasError = true;
+      cardContent += dischargeResult.html;
+    } else if (this._mode === 'charge') {
       const chargeResult = this._renderChargingSection();
       if (chargeResult.error) hasError = true;
       cardContent += chargeResult.html;
@@ -354,7 +368,7 @@ class SajH2InverterCardTimer extends HTMLElement {
           </div>
           
           <div class="timer-control">
-            <label class="control-label">Duration (mins):</label>
+            <label class="control-label">Time (mins):</label>
             <input type="number" id="charge-timer" class="timer-input" min="1" max="1440" step="1" value="${this._getTimerValue('charge', 30)}" />
             <button id="charging-enable" class="control-button enable-btn" ${pendingWrite ? 'disabled' : ''}>${chargingEnabled ? 'Extend' : 'Enable'}</button>
             <button id="charging-disable" class="control-button disable-btn" ${pendingWrite || !chargingEnabled ? 'disabled' : ''}>Disable</button>
@@ -428,7 +442,7 @@ class SajH2InverterCardTimer extends HTMLElement {
           </div>
           
           <div class="timer-control">
-            <label class="control-label">Duration (mins):</label>
+            <label class="control-label">Time (mins):</label>
             <input type="number" id="discharge-timer" class="timer-input" min="1" max="1440" step="1" value="${this._getTimerValue('discharge', 30)}" />
             <button id="discharging-enable" class="control-button enable-btn" ${pendingWrite ? 'disabled' : ''}>${dischargingEnabled ? 'Extend' : 'Enable'}</button>
             <button id="discharging-disable" class="control-button disable-btn" ${pendingWrite || !dischargingEnabled ? 'disabled' : ''}>Disable</button>
@@ -472,7 +486,55 @@ class SajH2InverterCardTimer extends HTMLElement {
         <span class="readonly-value">${displayTime}</span>
         <label class="readonly-label">End Time</label>
         <input type="time" id="${prefix}-end-time" value="${validEndTime}" step="300" class="time-input-hidden" ${disabled ? 'disabled' : ''} />
-      </div>`;
+  }
+
+  // Render toggle buttons for switching between charge and discharge modes
+  _renderToggleButtons() {
+    const chargeEnabled = this._hass.states[this._entities.chargingSwitch]?.state === 'on';
+    const dischargeEnabled = this._hass.states[this._entities.dischargingSwitch]?.state === 'on';
+    
+    return `
+      <div class="mode-toggle-container">
+        <button id="charge-mode-btn" class="mode-toggle-btn ${this._currentViewMode === 'charge' ? 'active' : ''}" 
+                ${chargeEnabled ? 'data-status="enabled"' : 'data-status="disabled"'}>
+          <span class="mode-icon">⚡</span>
+          <span class="mode-text">Charge</span>
+          <span class="mode-status ${chargeEnabled ? 'status-active' : 'status-inactive'}">${chargeEnabled ? 'ON' : 'OFF'}</span>
+        </button>
+        <button id="discharge-mode-btn" class="mode-toggle-btn ${this._currentViewMode === 'discharge' ? 'active' : ''}"
+                ${dischargeEnabled ? 'data-status="enabled"' : 'data-status="disabled"'}>
+          <span class="mode-icon">🔋</span>
+          <span class="mode-text">Discharge</span>
+          <span class="mode-status ${dischargeEnabled ? 'status-active' : 'status-inactive'}">${dischargeEnabled ? 'ON' : 'OFF'}</span>
+        </button>
+      </div>
+    `;
+  }
+
+  // Switch between charge and discharge modes, disabling the previous mode if active
+  _switchViewMode(newMode) {
+    if (newMode === this._currentViewMode) return; // No change needed
+    
+    const previousMode = this._currentViewMode;
+    this._currentViewMode = newMode;
+    
+    // Auto-disable the previous mode if it was active
+    if (previousMode === 'charge') {
+      const chargingSwitch = this._hass.states[this._entities.chargingSwitch];
+      if (chargingSwitch?.state === 'on') {
+        console.log('[saj-card] Auto-disabling charging when switching to discharge mode');
+        this._hass.callService('switch', 'turn_off', { entity_id: this._entities.chargingSwitch });
+      }
+    } else if (previousMode === 'discharge') {
+      const dischargingSwitch = this._hass.states[this._entities.dischargingSwitch];
+      if (dischargingSwitch?.state === 'on') {
+        console.log('[saj-card] Auto-disabling discharging when switching to charge mode');
+        this._hass.callService('switch', 'turn_off', { entity_id: this._entities.dischargingSwitch });
+      }
+    }
+    
+    // Re-render the card with the new mode
+    this._renderCard();
   }
 
 
@@ -518,8 +580,43 @@ class SajH2InverterCardTimer extends HTMLElement {
   // Add all event listeners after rendering
   _addEventListeners() {
     if (!this.shadowRoot) return;
-    if (this._mode !== 'discharge') this._addChargingEventListeners();
-    if (this._mode !== 'charge') this._addDischargingEventListeners();
+    
+    // Add toggle button listeners if in 'both' mode
+    if (this._mode === 'both') {
+      this._addToggleEventListeners();
+    }
+    
+    // Add section-specific listeners based on current view mode or specific mode
+    if (this._mode === 'both') {
+      if (this._currentViewMode === 'charge') {
+        this._addChargingEventListeners();
+      } else {
+        this._addDischargingEventListeners();
+      }
+    } else {
+      if (this._mode !== 'discharge') this._addChargingEventListeners();
+      if (this._mode !== 'charge') this._addDischargingEventListeners();
+    }
+  }
+
+  // Add event listeners for mode toggle buttons
+  _addToggleEventListeners() {
+    const chargeModeBtn = this.shadowRoot.querySelector('#charge-mode-btn');
+    const dischargeModeBtn = this.shadowRoot.querySelector('#discharge-mode-btn');
+    
+    if (chargeModeBtn && !chargeModeBtn.hasAttribute('data-listener-added')) {
+      chargeModeBtn.setAttribute('data-listener-added', 'true');
+      chargeModeBtn.addEventListener('click', () => {
+        this._switchViewMode('charge');
+      });
+    }
+    
+    if (dischargeModeBtn && !dischargeModeBtn.hasAttribute('data-listener-added')) {
+      dischargeModeBtn.setAttribute('data-listener-added', 'true');
+      dischargeModeBtn.addEventListener('click', () => {
+        this._switchViewMode('discharge');
+      });
+    }
   }
 
   // Add listeners for the charging section
@@ -1401,6 +1498,52 @@ class SajH2InverterCardTimer extends HTMLElement {
       .power-value {
         min-width: 50px; text-align: center; font-weight: bold;
         color: var(--primary-text-color); font-size: 0.95em;
+      }
+
+      /* Mode Toggle Buttons */
+      .mode-toggle-container {
+        display: flex; gap: 8px; margin-bottom: 16px; padding: 8px;
+        background-color: var(--secondary-background-color);
+        border-radius: 8px; border: 1px solid var(--divider-color);
+      }
+      .mode-toggle-btn {
+        flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
+        padding: 12px 8px; border: 1px solid var(--divider-color); border-radius: 6px;
+        background-color: var(--card-background-color); color: var(--primary-text-color);
+        cursor: pointer; transition: all 0.2s ease; position: relative;
+      }
+      .mode-toggle-btn:hover {
+        background-color: var(--state-icon-active-color); transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+      .mode-toggle-btn.active {
+        background-color: var(--primary-color); color: var(--text-primary-color-on-primary, white);
+        border-color: var(--primary-color); box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      }
+      .mode-toggle-btn.active:hover {
+        filter: brightness(110%);
+      }
+      .mode-icon {
+        font-size: 1.5em; margin-bottom: 2px;
+      }
+      .mode-text {
+        font-size: 0.9em; font-weight: 500;
+      }
+      .mode-status {
+        font-size: 0.7em; font-weight: 600; padding: 2px 6px; border-radius: 10px;
+        margin-top: 2px;
+      }
+      .mode-status.status-active {
+        background-color: var(--success-color); color: white;
+      }
+      .mode-status.status-inactive {
+        background-color: var(--error-color); color: white;
+      }
+      .mode-toggle-btn.active .mode-status.status-active {
+        background-color: rgba(255,255,255,0.2); color: white;
+      }
+      .mode-toggle-btn.active .mode-status.status-inactive {
+        background-color: rgba(255,255,255,0.2); color: white;
       }
 
       /* Control Button & Status */

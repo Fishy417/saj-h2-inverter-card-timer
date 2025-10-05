@@ -1388,12 +1388,15 @@ class SajH2InverterCardTimer extends HTMLElement {
         border-radius: 8px; margin-bottom: 12px; border: 1px solid var(--divider-color);
         display: flex; flex-direction: column; gap: 16px;
       }
-      .power-control, .timer-control {
+      .power-control {
         display: flex; align-items: center; gap: 12px;
+      }
+      .timer-control {
+        display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; align-items: center; gap: 12px;
       }
       .control-label {
         font-size: 1em; font-weight: 500; color: var(--primary-text-color);
-        white-space: nowrap; min-width: 140px;
+        white-space: nowrap; text-align: left;
       }
       .power-value {
         min-width: 50px; text-align: center; font-weight: bold;
@@ -1428,8 +1431,6 @@ class SajH2InverterCardTimer extends HTMLElement {
       .disable-btn {
         background-color: var(--error-color, #f44336); 
         color: var(--text-primary-color-on-error, white);
-        margin-left: 8px;
-        margin-right: 16px;
       }
       .enable-btn:hover:not(:disabled) { filter: brightness(110%); box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
       .disable-btn:hover:not(:disabled) { filter: brightness(110%); box-shadow: 0 2px 6px rgba(0,0,0,0.15); }

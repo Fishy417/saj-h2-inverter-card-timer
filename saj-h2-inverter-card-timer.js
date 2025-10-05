@@ -8,7 +8,7 @@
  * - Timer-based enable functionality for quick setup
  * based on saj-h2-inverter-card by @stanu74
  * @author fishy417 
- * @version 1.0.1
+ * @version 1.1.7
  */
 
 class SajH2InverterCardTimer extends HTMLElement {
@@ -37,7 +37,7 @@ class SajH2InverterCardTimer extends HTMLElement {
   constructor() {
     super();
 
-    console.log(`[SAJ H2 Inverter Card Timer] Version: 1.1.7`);
+    console.log(`[SAJ H2 Inverter Card Timer] Version: 1.0.1`);
   
     // Inverter maximum output in kW (will be set by config, default used if not specified)
     this._inverterMaxOutput = 5.0; // Default value, can be overridden in Lovelace config

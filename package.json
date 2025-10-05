@@ -1,6 +1,6 @@
 {
   "name": "saj-h2-inverter-card-timer",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "A custom Home Assistant Lovelace card for controlling SAJ H2 inverter charge/discharge schedules with timer functionality and kW display",
   "author": "Fishy417",
   "license": "MIT",

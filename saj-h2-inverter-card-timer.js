@@ -8,11 +8,11 @@
  * - Timer-based enable functionality for quick setup
  * based on saj-h2-inverter-card by @stanu74
  * @author fishy417 
- * @version 1.0.5
+ * @version 1.0.6
  */
 
 class SajH2InverterCardTimer extends HTMLElement {
-  static VERSION = '1.0.5';
+  static VERSION = '1.0.6';
   
   static get DEFAULT_ENTITIES() {
     // Default entity IDs (can be overridden in Lovelace config)
@@ -1392,7 +1392,7 @@ class SajH2InverterCardTimer extends HTMLElement {
         display: flex; align-items: center; gap: 12px;
       }
       .timer-control {
-        display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; align-items: center; gap: 12px;
+        display: grid; grid-template-columns: 140px 80px 1fr 1fr; align-items: center; gap: 12px;
       }
       .control-label {
         font-size: 1em; font-weight: 500; color: var(--primary-text-color);

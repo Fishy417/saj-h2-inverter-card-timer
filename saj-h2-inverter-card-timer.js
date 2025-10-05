@@ -8,11 +8,11 @@
  * - Timer-based enable functionality for quick setup
  * based on saj-h2-inverter-card by @stanu74
  * @author fishy417 
- * @version 1.0.8
+ * @version 1.0.9
  */
 
 class SajH2InverterCardTimer extends HTMLElement {
-  static VERSION = '1.0.8';
+  static VERSION = '1.0.9';
   
   static get DEFAULT_ENTITIES() {
     // Default entity IDs (can be overridden in Lovelace config)
@@ -292,11 +292,9 @@ class SajH2InverterCardTimer extends HTMLElement {
       <style>
         ${this._getStyles()}
       </style>
-      <ha-card>
-        <div class="card-content">
-          ${cardContent}
-        </div>
-      </ha-card>
+      <div class="card-container">
+        ${cardContent}
+      </div>
     `;
 
     // Restore focus and selection if an element had focus before re-render
@@ -356,41 +354,50 @@ class SajH2InverterCardTimer extends HTMLElement {
     const minKw = this._percentToSliderKw(10);
     const maxKw = this._percentToSliderKw(100);
 
-    const html = `
-      <div class="section charging-section">
-        <h3 class="section-heading">Charge Controls</h3>
-        <div class="controls-container">
-          <div class="power-control">
-            <div class="slider-container">
-              <input type="range" id="charge-power-slider" class="power-slider" min="${minKw}" max="${maxKw}" step="0.5" value="${chargePowerKw}" ${pendingWrite ? 'disabled' : ''} title="Controls PV charge limits when charging disabled, PV+Grid when enabled" />
-              <span id="charge-power-value" class="power-value">${chargePowerKw}&nbsp;kW</span>
+    const controlsHtml = `
+      <ha-card>
+        <div class="card-content">
+          <h3 class="section-heading">Charge Controls</h3>
+          <div class="controls-container">
+            <div class="power-control">
+              <div class="slider-container">
+                <input type="range" id="charge-power-slider" class="power-slider" min="${minKw}" max="${maxKw}" step="0.5" value="${chargePowerKw}" ${pendingWrite ? 'disabled' : ''} title="Controls PV charge limits when charging disabled, PV+Grid when enabled" />
+                <span id="charge-power-value" class="power-value">${chargePowerKw}&nbsp;kW</span>
+              </div>
+            </div>
+            
+            <div class="timer-control">
+              <label class="control-label">Time (mins):</label>
+              <input type="number" id="charge-timer" class="timer-input" min="1" max="1440" step="1" value="${this._getTimerValue('charge', 30)}" />
+              <button id="charging-enable" class="control-button enable-btn" ${pendingWrite ? 'disabled' : ''}>${chargingEnabled ? 'Extend' : 'Enable'}</button>
+              <button id="charging-disable" class="control-button disable-btn" ${pendingWrite || !chargingEnabled ? 'disabled' : ''}>Disable</button>
             </div>
           </div>
-          
-          <div class="timer-control">
-            <label class="control-label">Time (mins):</label>
-            <input type="number" id="charge-timer" class="timer-input" min="1" max="1440" step="1" value="${this._getTimerValue('charge', 30)}" />
-            <button id="charging-enable" class="control-button enable-btn" ${pendingWrite ? 'disabled' : ''}>${chargingEnabled ? 'Extend' : 'Enable'}</button>
-            <button id="charging-disable" class="control-button disable-btn" ${pendingWrite || !chargingEnabled ? 'disabled' : ''}>Disable</button>
-          </div>
         </div>
-        
-        <div class="readonly-container">
-          <div class="status-line">
-            ${pendingWrite ? 
-              '<span class="status-text status-pending">Wait for Modbus Transfer</span>' : 
-              `<span class="status-text ${chargingEnabled ? 'status-active' : 'status-inactive'}">${chargingEnabled ? 'Active' : 'Inactive'}</span>`
-            }
-          </div>
-          <div class="data-line">
-            <div class="readonly-field">
-              <span class="readonly-value">${actualChargePowerKw} kW</span>
-              <label class="readonly-label">Current Power</label>
+      </ha-card>`;
+      
+    const statusHtml = `
+      <ha-card>
+        <div class="card-content">
+          <div class="readonly-container">
+            <div class="status-line">
+              ${pendingWrite ? 
+                '<span class="status-text status-pending">Wait for Modbus Transfer</span>' : 
+                `<span class="status-text ${chargingEnabled ? 'status-active' : 'status-inactive'}">${chargingEnabled ? 'Active' : 'Inactive'}</span>`
+              }
             </div>
-            ${this._renderTimeSelects('charge', chargeStart, chargeEnd, chargePower, pendingWrite)}
+            <div class="data-line">
+              <div class="readonly-field">
+                <span class="readonly-value">${actualChargePowerKw} kW</span>
+                <label class="readonly-label">Current Power</label>
+              </div>
+              ${this._renderTimeSelects('charge', chargeStart, chargeEnd, chargePower, pendingWrite)}
+            </div>
           </div>
         </div>
-      </div>`;
+      </ha-card>`;
+      
+    const html = controlsHtml + statusHtml;
       return { html: html, error: false };
   }
 
@@ -430,41 +437,50 @@ class SajH2InverterCardTimer extends HTMLElement {
     const minKw = this._percentToSliderKw(10);
     const maxKw = this._percentToSliderKw(100);
 
-    const html = `
-      <div class="section discharging-section">
-        <h3 class="section-heading">Discharge Control v${SajH2InverterCardTimer.VERSION}</h3>
-        <div class="controls-container">
-          <div class="power-control">
-            <div class="slider-container">
-              <input type="range" id="discharge-power-slider" class="power-slider" min="${minKw}" max="${maxKw}" step="0.5" value="${dischargePowerKw}" ${pendingWrite ? 'disabled' : ''} />
-              <span id="discharge-power-value" class="power-value">${dischargePowerKw}&nbsp;kW</span>
+    const controlsHtml = `
+      <ha-card>
+        <div class="card-content">
+          <h3 class="section-heading">Discharge Control v${SajH2InverterCardTimer.VERSION}</h3>
+          <div class="controls-container">
+            <div class="power-control">
+              <div class="slider-container">
+                <input type="range" id="discharge-power-slider" class="power-slider" min="${minKw}" max="${maxKw}" step="0.5" value="${dischargePowerKw}" ${pendingWrite ? 'disabled' : ''} />
+                <span id="discharge-power-value" class="power-value">${dischargePowerKw}&nbsp;kW</span>
+              </div>
+            </div>
+            
+            <div class="timer-control">
+              <label class="control-label">Time (mins):</label>
+              <input type="number" id="discharge-timer" class="timer-input" min="1" max="1440" step="1" value="${this._getTimerValue('discharge', 30)}" />
+              <button id="discharging-enable" class="control-button enable-btn" ${pendingWrite ? 'disabled' : ''}>${dischargingEnabled ? 'Extend' : 'Enable'}</button>
+              <button id="discharging-disable" class="control-button disable-btn" ${pendingWrite || !dischargingEnabled ? 'disabled' : ''}>Disable</button>
             </div>
           </div>
-          
-          <div class="timer-control">
-            <label class="control-label">Time (mins):</label>
-            <input type="number" id="discharge-timer" class="timer-input" min="1" max="1440" step="1" value="${this._getTimerValue('discharge', 30)}" />
-            <button id="discharging-enable" class="control-button enable-btn" ${pendingWrite ? 'disabled' : ''}>${dischargingEnabled ? 'Extend' : 'Enable'}</button>
-            <button id="discharging-disable" class="control-button disable-btn" ${pendingWrite || !dischargingEnabled ? 'disabled' : ''}>Disable</button>
-          </div>
         </div>
-        
-        <div class="readonly-container">
-          <div class="status-line">
-            ${pendingWrite ? 
-              '<span class="status-text status-pending">Wait for Modbus Transfer</span>' : 
-              `<span class="status-text ${dischargingEnabled ? 'status-active' : 'status-inactive'}">${dischargingEnabled ? 'Active' : 'Inactive'}</span>`
-            }
-          </div>
-          <div class="data-line">
-            <div class="readonly-field">
-              <span class="readonly-value">${actualDischargePowerKw} kW</span>
-              <label class="readonly-label">Current Power</label>
+      </ha-card>`;
+      
+    const statusHtml = `
+      <ha-card>
+        <div class="card-content">
+          <div class="readonly-container">
+            <div class="status-line">
+              ${pendingWrite ? 
+                '<span class="status-text status-pending">Wait for Modbus Transfer</span>' : 
+                `<span class="status-text ${dischargingEnabled ? 'status-active' : 'status-inactive'}">${dischargingEnabled ? 'Active' : 'Inactive'}</span>`
+              }
             </div>
-            ${this._renderTimeSelects('discharge', dischargeStart, dischargeEnd, dischargePower, pendingWrite)}
+            <div class="data-line">
+              <div class="readonly-field">
+                <span class="readonly-value">${actualDischargePowerKw} kW</span>
+                <label class="readonly-label">Current Power</label>
+              </div>
+              ${this._renderTimeSelects('discharge', dischargeStart, dischargeEnd, dischargePower, pendingWrite)}
+            </div>
           </div>
         </div>
-      </div>`;
+      </ha-card>`;
+      
+    const html = controlsHtml + statusHtml;
       return { html: html, error: false };
   }
 
@@ -512,27 +528,11 @@ class SajH2InverterCardTimer extends HTMLElement {
     `;
   }
 
-  // Switch between charge and discharge modes, disabling the previous mode if active
+  // Switch between charge and discharge modes without auto-disabling
   _switchViewMode(newMode) {
     if (newMode === this._currentViewMode) return; // No change needed
     
-    const previousMode = this._currentViewMode;
     this._currentViewMode = newMode;
-    
-    // Auto-disable the previous mode if it was active
-    if (previousMode === 'charge') {
-      const chargingSwitch = this._hass.states[this._entities.chargingSwitch];
-      if (chargingSwitch?.state === 'on') {
-        console.log('[saj-card] Auto-disabling charging when switching to discharge mode');
-        this._hass.callService('switch', 'turn_off', { entity_id: this._entities.chargingSwitch });
-      }
-    } else if (previousMode === 'discharge') {
-      const dischargingSwitch = this._hass.states[this._entities.dischargingSwitch];
-      if (dischargingSwitch?.state === 'on') {
-        console.log('[saj-card] Auto-disabling discharging when switching to charge mode');
-        this._hass.callService('switch', 'turn_off', { entity_id: this._entities.dischargingSwitch });
-      }
-    }
     
     // Re-render the card with the new mode
     this._renderCard();
@@ -645,6 +645,13 @@ class SajH2InverterCardTimer extends HTMLElement {
           this._setEntityValue(this._entities.chargeEnd, extendedEndTime, 'text');
         } else {
           // Enable functionality: Set new timer-based schedule
+          // Auto-disable discharge if it's currently active
+          const dischargingSwitch = this._hass.states[this._entities.dischargingSwitch];
+          if (dischargingSwitch?.state === 'on') {
+            console.log('[saj-card] Auto-disabling discharge when enabling charge');
+            this._hass.callService('switch', 'turn_off', { entity_id: this._entities.dischargingSwitch });
+          }
+          
           // Convert kW slider value to percentage for entity
           const chargePowerKw = chargePowerSlider ? parseFloat(chargePowerSlider.value) : 1.25;
           const chargePower = this._sliderKwToPercent(chargePowerKw);
@@ -763,6 +770,13 @@ class SajH2InverterCardTimer extends HTMLElement {
           this._setEntityValue(this._entities.dischargeEnd, extendedEndTime, 'text');
         } else {
           // Enable functionality: Set new timer-based schedule
+          // Auto-disable charge if it's currently active
+          const chargingSwitch = this._hass.states[this._entities.chargingSwitch];
+          if (chargingSwitch?.state === 'on') {
+            console.log('[saj-card] Auto-disabling charge when enabling discharge');
+            this._hass.callService('switch', 'turn_off', { entity_id: this._entities.chargingSwitch });
+          }
+          
           // Convert kW slider value to percentage for entity
           const dischargePowerKw = dischargePowerSlider ? parseFloat(dischargePowerSlider.value) : 2.5;
           const dischargePower = this._sliderKwToPercent(dischargePowerKw);
@@ -1219,8 +1233,13 @@ class SajH2InverterCardTimer extends HTMLElement {
         --primary-color-rgb: var(--rgb-primary-color, 33, 150, 243);
         --disabled-text-color-rgb: var(--rgb-disabled-text-color, 180, 180, 180);
       }
+      .card-container {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
       ha-card {
-        height: 100%; display: flex; flex-direction: column;
+        height: auto; display: flex; flex-direction: column;
         justify-content: space-between; overflow: hidden;
       }
       .card-content { padding: 16px; flex-grow: 1; }

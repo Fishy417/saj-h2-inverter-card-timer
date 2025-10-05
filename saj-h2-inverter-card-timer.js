@@ -1327,7 +1327,7 @@ class SajH2InverterCardTimer extends HTMLElement {
       .timer-input {
         padding: 8px 12px; border: 1px solid var(--input-ink-color, var(--divider-color));
         border-radius: 6px; background-color: var(--input-fill-color, var(--card-background-color));
-        color: var(--primary-text-color); font-size: 1em; outline: none; width: 80px;
+        color: var(--primary-text-color); font-size: 1em; outline: none; width: 60px;
         transition: border-color 0.2s ease; text-align: center;
       }
       .timer-input:hover { border-color: var(--input-hover-ink-color, var(--primary-color)); }
@@ -1426,6 +1426,7 @@ class SajH2InverterCardTimer extends HTMLElement {
       .disable-btn {
         background-color: var(--error-color, #f44336); 
         color: var(--text-primary-color-on-error, white);
+        margin-left: 8px;
       }
       .enable-btn:hover:not(:disabled) { filter: brightness(110%); box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
       .disable-btn:hover:not(:disabled) { filter: brightness(110%); box-shadow: 0 2px 6px rgba(0,0,0,0.15); }

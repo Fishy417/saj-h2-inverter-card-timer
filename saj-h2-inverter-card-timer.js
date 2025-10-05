@@ -6,9 +6,9 @@
  * - Handles pending states via hass object updates.
  * - Protects specific input interactions (time, range) from disruptive re-renders.
  * - Timer-based enable functionality for quick setup
- *
- * @author stanu74 
- * @version 1.1.7
+ * based on saj-h2-inverter-card by @stanu74
+ * @author fishy417 
+ * @version 1.0.1
  */
 
 class SajH2InverterCardTimer extends HTMLElement {
@@ -342,7 +342,7 @@ class SajH2InverterCardTimer extends HTMLElement {
 
     const html = `
       <div class="section charging-section">
-        <h3 class="section-heading">Charge Control</h3>
+        <h3 class="section-heading">Charge Controls</h3>
         <div class="controls-container">
           <div class="power-control">
             <div class="slider-container">

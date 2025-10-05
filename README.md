@@ -31,6 +31,27 @@ This card requires the following Home Assistant entities:
 
 ## Installation
 
+### Via HACS (Recommended)
+
+1. Add this repository to HACS as a custom repository:
+   - Go to HACS in Home Assistant
+   - Click on "Frontend"
+   - Click the three dots menu and select "Custom repositories"
+   - Add `https://github.com/Fishy417/saj-h2-inverter-card` as a "Lovelace" repository
+   - Install "SAJ H2 Inverter Card Timer"
+
+2. Add the resource to your Lovelace configuration (HACS usually does this automatically):
+
+```yaml
+resources:
+  - url: /hacsfiles/saj-h2-inverter-card/saj-h2-inverter-card-timer.js
+    type: module
+```
+
+3. Restart Home Assistant
+
+### Manual Installation
+
 1. Copy `saj-h2-inverter-card-timer.js` to your `www` folder in Home Assistant
 2. Add the resource to your Lovelace dashboard configuration:
 
@@ -40,7 +61,11 @@ resources:
     type: module
 ```
 
-3. Add the card to your dashboard using the configuration above
+3. Restart Home Assistant
+
+## Updates
+
+When using HACS, updates will be automatically detected and you'll be notified in the HACS interface. Simply click update when a new version is available.
 
 ## Development
 

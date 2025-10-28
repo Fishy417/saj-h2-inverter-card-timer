@@ -91,12 +91,6 @@ class BatteryTimeTileCard extends HTMLElement {
             <div class="time-box ${timeData.status}">
               <div class="time-label">${timeData.timeLabel}</div>
               <div class="time-value">${timeData.timeDisplay}</div>
-              ${this._slimMode ? `
-                <div class="slim-details">
-                  <span class="slim-power">${Math.abs(power).toFixed(2)} kW ${timeData.label}</span>
-                  <span class="slim-soc">${soc.toFixed(0)}%</span>
-                </div>
-              ` : ''}
             </div>
           </div>
           

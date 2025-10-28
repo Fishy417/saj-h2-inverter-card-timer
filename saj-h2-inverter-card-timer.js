@@ -351,7 +351,7 @@ class SajH2InverterCardTimer extends HTMLElement {
     // Convert percentage to kW for slider display
     const chargePowerKw = this._percentToSliderKw(chargePower);
     const actualChargePowerKw = this._percentToKw(actualChargePower);
-    const minKw = this._percentToSliderKw(10);
+    const minKw = this._percentToSliderKw(1);
     const maxKw = this._percentToSliderKw(100);
 
     const controlsHtml = `
@@ -359,14 +359,11 @@ class SajH2InverterCardTimer extends HTMLElement {
         <div class="card-content">
           <h3 class="section-heading">Charge Controls</h3>
           <div class="controls-container">
-            <div class="power-control">
-              <div class="slider-container">
-                <input type="range" id="charge-power-slider" class="power-slider" min="${minKw}" max="${maxKw}" step="0.5" value="${chargePowerKw}" ${pendingWrite ? 'disabled' : ''} title="Controls PV charge limits when charging disabled, PV+Grid when enabled" />
-                <span id="charge-power-value" class="power-value">${chargePowerKw}&nbsp;kW</span>
-              </div>
+            <div class="power-row">
+              <input type="range" id="charge-power-slider" class="power-slider" min="${minKw}" max="${maxKw}" step="0.5" value="${chargePowerKw}" ${pendingWrite ? 'disabled' : ''} title="Controls PV charge limits when charging disabled, PV+Grid when enabled" />
+              <span id="charge-power-value" class="power-value">${chargePowerKw}&nbsp;kW</span>
             </div>
-            
-            <div class="timer-control">
+            <div class="control-row">
               <label class="control-label">Time (mins):</label>
               <input type="number" id="charge-timer" class="timer-input" min="1" max="1440" step="1" value="${this._getTimerValue('charge', 30)}" />
               <button id="charging-enable" class="control-button enable-btn" ${pendingWrite ? 'disabled' : ''}>${chargingEnabled ? 'Extend' : 'Enable'}</button>
@@ -434,7 +431,7 @@ class SajH2InverterCardTimer extends HTMLElement {
     // Convert percentage to kW for slider display
     const dischargePowerKw = this._percentToSliderKw(dischargePower);
     const actualDischargePowerKw = this._percentToKw(actualDischargePower);
-    const minKw = this._percentToSliderKw(10);
+    const minKw = this._percentToSliderKw(1);
     const maxKw = this._percentToSliderKw(100);
 
     const controlsHtml = `
@@ -442,14 +439,11 @@ class SajH2InverterCardTimer extends HTMLElement {
         <div class="card-content">
           <h3 class="section-heading">Discharge Control v${SajH2InverterCardTimer.VERSION}</h3>
           <div class="controls-container">
-            <div class="power-control">
-              <div class="slider-container">
-                <input type="range" id="discharge-power-slider" class="power-slider" min="${minKw}" max="${maxKw}" step="0.5" value="${dischargePowerKw}" ${pendingWrite ? 'disabled' : ''} />
-                <span id="discharge-power-value" class="power-value">${dischargePowerKw}&nbsp;kW</span>
-              </div>
+            <div class="power-row">
+              <input type="range" id="discharge-power-slider" class="power-slider" min="${minKw}" max="${maxKw}" step="0.5" value="${dischargePowerKw}" ${pendingWrite ? 'disabled' : ''} />
+              <span id="discharge-power-value" class="power-value">${dischargePowerKw}&nbsp;kW</span>
             </div>
-            
-            <div class="timer-control">
+            <div class="control-row">
               <label class="control-label">Time (mins):</label>
               <input type="number" id="discharge-timer" class="timer-input" min="1" max="1440" step="1" value="${this._getTimerValue('discharge', 30)}" />
               <button id="discharging-enable" class="control-button enable-btn" ${pendingWrite ? 'disabled' : ''}>${dischargingEnabled ? 'Extend' : 'Enable'}</button>
@@ -624,14 +618,14 @@ class SajH2InverterCardTimer extends HTMLElement {
   // This version only calls the service, no optimistic UI updates.
   _addChargingEventListeners() {
     const q = sel => this.shadowRoot.querySelector(sel);
-    const chargeSection = q('.charging-section');
-    if (!chargeSection) return;
-
-    // Charge Enable Button
+    
+    // Check if charge elements exist instead of looking for section
     const enableBtn = q('#charging-enable');
+    if (!enableBtn) return; // No charge elements, skip
     if (enableBtn && !enableBtn.hasAttribute('data-listener-added')) {
       enableBtn.setAttribute('data-listener-added', 'true');
       enableBtn.addEventListener('click', () => {
+        console.log('[saj-card] Charge enable button clicked');
         const entityId = this._entities.chargingSwitch;
         const currentState = this._hass.states[entityId]?.state;
         const timerInput = q('#charge-timer');
@@ -749,14 +743,14 @@ class SajH2InverterCardTimer extends HTMLElement {
   // This version only calls the service, no optimistic UI updates.
   _addDischargingEventListeners() {
     const q = sel => this.shadowRoot.querySelector(sel);
-    const dischargeSection = q('.discharging-section');
-    if (!dischargeSection) return;
-
-    // Discharge Enable Button
+    
+    // Check if discharge elements exist instead of looking for section
     const enableBtn = q('#discharging-enable');
+    if (!enableBtn) return; // No discharge elements, skip
     if (enableBtn && !enableBtn.hasAttribute('data-listener-added')) {
       enableBtn.setAttribute('data-listener-added', 'true');
       enableBtn.addEventListener('click', () => {
+        console.log('[saj-card] Discharge enable button clicked');
         const entityId = this._entities.dischargingSwitch;
         const currentState = this._hass.states[entityId]?.state;
         const timerInput = q('#discharge-timer');
@@ -1236,7 +1230,7 @@ class SajH2InverterCardTimer extends HTMLElement {
       .card-container {
         display: flex;
         flex-direction: column;
-        gap: 16px;
+        gap: 8px;
       }
       ha-card {
         height: auto; display: flex; flex-direction: column;
@@ -1417,14 +1411,35 @@ class SajH2InverterCardTimer extends HTMLElement {
       .controls-container {
         padding: 16px; background-color: var(--secondary-background-color);
         border-radius: 8px; margin-bottom: 12px; border: 1px solid var(--divider-color);
-        display: flex; flex-direction: column; gap: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
       }
-      .power-control, .timer-control {
-        display: flex; align-items: center; gap: 8px; padding-right: 12px;
+      .power-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .control-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr 1fr;
+        gap: 8px;
+        align-items: center;
+      }
+      .timer-section {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        justify-self: center;
+      }
+      .button-section {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
       }
       .control-label {
         font-size: 1em; font-weight: 500; color: var(--primary-text-color);
-        white-space: nowrap; min-width: 140px;
+        white-space: nowrap;
       }
 
       /* Section Headings */
@@ -1435,12 +1450,10 @@ class SajH2InverterCardTimer extends HTMLElement {
         text-transform: uppercase; letter-spacing: 0.5px;
       }
 
-      /* Slider Container */
-      .slider-container {
-        display: flex; align-items: center; gap: 12px; margin-bottom: 12px;
-      }
-      .slider-container:last-child {
-        margin-bottom: 0;
+      /* Power Row - Slider and Value */
+      .power-row .power-slider {
+        flex: 1;
+        min-width: 0;
       }
 
       .timer-input {

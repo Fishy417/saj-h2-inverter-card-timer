@@ -1,11 +1,11 @@
 /**
  * Battery Time to Full/Empty Tile Card
  * Shows time to fully charged or discharged based on current power flow
- * @version 1.0.1
+ * @version 1.0.2
  */
 
 class BatteryTimeTileCard extends HTMLElement {
-  static VERSION = '1.0.1';
+  static VERSION = '1.0.2';
 
   constructor() {
     super();

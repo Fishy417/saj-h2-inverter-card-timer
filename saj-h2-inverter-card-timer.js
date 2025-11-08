@@ -8,11 +8,11 @@
  * - Timer-based enable functionality for quick setup
  * based on saj-h2-inverter-card by @stanu74
  * @author fishy417 
- * @version 1.0.9
+ * @version 1.0.10
  */
 
 class SajH2InverterCardTimer extends HTMLElement {
-  static VERSION = '1.0.9';
+  static VERSION = '1.0.10';
   
   static get DEFAULT_ENTITIES() {
     // Default entity IDs (can be overridden in Lovelace config)
@@ -32,7 +32,8 @@ class SajH2InverterCardTimer extends HTMLElement {
       dischargePower: 'number.saj_discharge1_power_percent_input',
       dischargeDayMask: 'number.saj_discharge1_day_mask_input',
       dischargingSwitch:'switch.saj_discharging_control',
-      dischargePowerSensor: 'sensor.saj_discharge_power_percent'
+      dischargePowerSensor: 'sensor.saj_discharge_power_percent',
+      dischargeTimeEnable: 'number.saj_discharge_time_enable_input' // Controls which slots are active
     };
   }
 
@@ -784,6 +785,9 @@ class SajH2InverterCardTimer extends HTMLElement {
           this._setEntityValue(this._entities.dischargeEnd, endTime, 'text');
           this._setEntityValue(this._entities.dischargeDayMask, dayMask, 'number');
           this._setEntityValue(this._entities.dischargePower, dischargePower, 'number');
+          
+          // CRITICAL: Enable discharge slot 1 (bit 0 = value 1)
+          this._setEntityValue(this._entities.dischargeTimeEnable, 1, 'number');
           
           // Small delay to ensure time settings are processed before enabling
           setTimeout(() => {
